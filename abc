@@ -1,0 +1,47 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  generation: 5
+  name: abc-gateway
+  namespace: ro
+spec:
+  selector:
+    istio: ingress
+  servers:
+  - hosts:
+    - abc.ro.devalpha.com
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+  - hosts:
+    - abc.ro.devalpha.com
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: abc-ro-chain-tls
+      mode: SIMPLE
+
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  generation: 2
+  name: abc-vs
+  namespace: ro
+spec:
+  gateways:
+  - abc-gateway
+  hosts:
+  - abc.ro.devalpha.com
+  http:
+  - route:
+    - destination:
+        host: abc-svc-web.ro.svc.cluster.local
+        port:
+          number: 80
+    timeout: 30s
